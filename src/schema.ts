@@ -1,6 +1,6 @@
 import { buildSchemaSync } from "type-graphql";
-import { RecipeResolver } from "./resolvers";
+import { UserResolver } from "./user";
 
 export const schema = buildSchemaSync({
-  resolvers: [RecipeResolver],
+  resolvers: [UserResolver],
 });
