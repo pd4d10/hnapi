@@ -1,20 +1,11 @@
-import { ObjectType, Field, Int } from "type-graphql";
-import { User } from "./user";
+import { createUnionType } from "type-graphql";
+import { Story } from "./story";
+import { Job } from "./job";
+import { Comment } from "./comment";
+import { Poll } from "./poll";
+import { Pollopt } from "./pollopt";
 
-@ObjectType()
-export class Item {
-  @Field(() => Int, { description: "The item's unique id." })
-  id: number;
-
-  @Field({ description: "true if the item is deleted." })
-  deleted: boolean;
-
-  @Field(() => User, { description: "The the item's author." })
-  by: User;
-
-  @Field({ description: "Creation date of the item." })
-  time: Date;
-
-  @Field({ description: "true if the item is dead." })
-  dead: boolean;
-}
+export const Item = createUnionType({
+  name: "Item",
+  types: () => [Story, Job, Comment, Poll, Pollopt],
+});

@@ -1,9 +1,9 @@
-import { Item } from "./item";
+import { BaseItem } from "./base-item";
 import { Field, ObjectType } from "type-graphql";
 import { Story } from "./story";
 
 @ObjectType()
-export class Comment extends Item {
+export class Comment extends BaseItem {
   @Field({ description: "The comment, story or poll text. HTML." })
   text: string;
 
