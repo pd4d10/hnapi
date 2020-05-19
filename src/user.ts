@@ -86,9 +86,7 @@ export class UserResolver {
   @FieldResolver()
   async submitted(@Root() { id }: User): Promise<typeof Item[]> {
     const user = await dl.user.load(id);
-    const items = await dl.item.loadMany(
-      (user.submitted ?? []).map((x) => x.toString())
-    );
+    const items = await dl.item.loadMany(user.submitted ?? []);
     return items.map((item) => {
       if (item instanceof Error) {
         throw item;

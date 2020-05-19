@@ -1,6 +1,7 @@
 import { BaseItem } from "./base-item";
-import { Field, ObjectType } from "type-graphql";
+import { Field, ObjectType, Resolver, FieldResolver, Root } from "type-graphql";
 import { Story } from "./story";
+import { HnComment, dl } from "./services";
 
 @ObjectType()
 export class Comment extends BaseItem {
@@ -17,4 +18,19 @@ export class Comment extends BaseItem {
     description: "The item's comments, in ranked display order.",
   })
   kids: Comment[];
+}
+
+@Resolver(() => Comment)
+export class CommentResolver {
+  private async load(id: string): Promise<HnComment> {
+    const v = await dl.item.load(parseInt(id));
+    if (v.type !== "comment") throw new Error("Not a comment");
+    return v;
+  }
+
+  @FieldResolver()
+  async text(@Root() { id }: Comment): Promise<string | undefined> {
+    const v = await this.load(id);
+    return v.text;
+  }
 }

@@ -19,7 +19,7 @@ export interface HnUser {
 export interface HnStory {
   type: "story";
   by: string;
-  descendants: number;
+  descendants: number[];
   id: number;
   kids: number[];
   score: number;
@@ -77,15 +77,21 @@ export type HnItem = HnStory | HnComment | HnJob | HnPoll | HnPollopt;
 
 export async function getValue(path: string) {
   const snapshot = await ref.child(path).once("value");
-  console.log(snapshot.val());
+  console.log(path, snapshot.val());
   return snapshot.val();
 }
 
 export const dl = {
-  user: new DataLoader<string, HnUser>(async (ids) => {
-    return Promise.all(ids.map((id) => getValue(`user/${id}`)));
-  }),
-  item: new DataLoader<string, HnItem>(async (ids) => {
-    return Promise.all(ids.map((id) => getValue(`item/${id}`)));
-  }),
+  user: new DataLoader<string, HnUser>(
+    async (ids) => {
+      return Promise.all(ids.map((id) => getValue(`user/${id}`)));
+    },
+    { cache: false }
+  ),
+  item: new DataLoader<number, HnItem>(
+    async (ids) => {
+      return Promise.all(ids.map((id) => getValue(`item/${id}`)));
+    },
+    { cache: false }
+  ),
 };
