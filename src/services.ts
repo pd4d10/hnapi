@@ -16,61 +16,58 @@ export interface HnUser {
   submitted?: number[];
 }
 
-export interface HnStory {
+export interface HnCommonItem {
+  id: number;
+  time: number;
+  deleted?: boolean;
+  dead?: boolean;
+}
+
+export interface HnStory extends HnCommonItem {
   type: "story";
   by: string;
   descendants: number[];
-  id: number;
   kids: number[];
   score: number;
-  time: number;
   title: string;
   url?: string;
   text?: string;
 }
 
-export interface HnComment {
+export interface HnComment extends HnCommonItem {
   type: "comment";
   by: string;
-  id: number;
   kids: number[];
   parent: number;
   text: string;
-  time: number;
 }
 
-export interface HnJob {
+export interface HnJob extends HnCommonItem {
   type: "job";
   by: string;
-  id: number;
   score: number;
   text: string;
-  time: number;
   title: string;
   url: string;
 }
 
-export interface HnPoll {
+export interface HnPoll extends HnCommonItem {
   type: "poll";
   by: string;
   descendants: number;
-  id: number;
   kids: number[];
   parts: number[];
   score: number;
   text: string;
-  time: number;
   title: string;
 }
 
-export interface HnPollopt {
+export interface HnPollopt extends HnCommonItem {
   type: "pollopt";
   by: string;
-  id: number;
   poll: number;
   score: number;
   text: string;
-  time: number;
 }
 
 export type HnItem = HnStory | HnComment | HnJob | HnPoll | HnPollopt;

@@ -20,11 +20,11 @@ export class Story extends BaseItem {
   @Field({ nullable: true, description: "The URL of the story." })
   url?: string;
 
-  @Field(() => Int, { nullable: true, description: "The story's score." })
-  score?: number;
+  @Field(() => Int, { description: "The story's score." })
+  score: number;
 
-  @Field({ nullable: true, description: "The title of the story." })
-  title?: string;
+  @Field({ description: "The title of the story." })
+  title: string;
 
   @Field(() => [Comment], {
     description: "The story's comments, in ranked display order.",
@@ -61,18 +61,12 @@ export class StoryResolver {
   }
 
   @FieldResolver()
-  async score(
-    @Root() root: Story,
-    @Ctx() ctx: MyContext
-  ): Promise<Maybe<number>> {
+  async score(@Root() root: Story, @Ctx() ctx: MyContext): Promise<number> {
     return this.load(root, ctx, (v) => v.score);
   }
 
   @FieldResolver()
-  async title(
-    @Root() root: Story,
-    @Ctx() ctx: MyContext
-  ): Promise<Maybe<string>> {
+  async title(@Root() root: Story, @Ctx() ctx: MyContext): Promise<string> {
     return this.load(root, ctx, (v) => v.title);
   }
 

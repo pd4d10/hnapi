@@ -13,9 +13,6 @@ export class BaseItem {
   @Field(() => ID, { description: "The item's unique id." })
   id: string;
 
-  @Field({ description: "true if the item is deleted." })
-  deleted: boolean;
-
   @Field(() => User, { description: "The the item's author." })
   by: User;
 

@@ -18,6 +18,8 @@ import { Job } from "./job";
 import { Poll } from "./poll";
 import { Pollopt } from "./pollopt";
 import { MyContext, HnUser } from "./services";
+import { DeletedItem } from "./deleted-item";
+import { DeadItem } from "./dead-item";
 
 @ObjectType()
 export class User {
@@ -104,6 +106,13 @@ export class UserResolver {
       if (item instanceof Error) {
         throw item;
       }
+      if (item.deleted) {
+        return new DeletedItem(item.id);
+      }
+      if (item.dead) {
+        return new DeadItem(item.id);
+      }
+
       switch (item.type) {
         case "story":
           return new Story(item.id);

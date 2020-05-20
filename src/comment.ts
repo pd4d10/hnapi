@@ -41,10 +41,7 @@ export class CommentResolver {
   }
 
   @FieldResolver()
-  async text(
-    @Root() root: Comment,
-    @Ctx() ctx: MyContext
-  ): Promise<Maybe<string>> {
+  async text(@Root() root: Comment, @Ctx() ctx: MyContext): Promise<string> {
     return this.load(root, ctx, (v) => v.text);
   }
 
