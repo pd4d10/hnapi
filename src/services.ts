@@ -81,7 +81,7 @@ export async function getValue(path: string) {
   return snapshot.val();
 }
 
-export const dl = {
+export const createDataLoader = () => ({
   user: new DataLoader<string, HnUser>(
     async (ids) => {
       return Promise.all(ids.map((id) => getValue(`user/${id}`)));
@@ -94,4 +94,8 @@ export const dl = {
     },
     { cache: false }
   ),
+});
+
+export type MyContext = {
+  dl: ReturnType<typeof createDataLoader>;
 };

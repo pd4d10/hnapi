@@ -3,7 +3,10 @@ import { User } from "./user";
 
 @ObjectType({ isAbstract: true })
 export class BaseItem {
+  itemId: number;
+
   constructor(id: number) {
+    this.itemId = id;
     this.id = id.toString();
   }
 

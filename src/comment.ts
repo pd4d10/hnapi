@@ -1,7 +1,15 @@
 import { BaseItem } from "./base-item";
-import { Field, ObjectType, Resolver, FieldResolver, Root } from "type-graphql";
+import {
+  Field,
+  ObjectType,
+  Resolver,
+  FieldResolver,
+  Root,
+  Ctx,
+  Maybe,
+} from "type-graphql";
 import { Story } from "./story";
-import { HnComment, dl } from "./services";
+import { HnComment, MyContext } from "./services";
 
 @ObjectType()
 export class Comment extends BaseItem {
@@ -22,15 +30,31 @@ export class Comment extends BaseItem {
 
 @Resolver(() => Comment)
 export class CommentResolver {
-  private async load(id: string): Promise<HnComment> {
-    const v = await dl.item.load(parseInt(id));
+  private async load<T>(
+    { itemId }: Comment,
+    { dl }: MyContext,
+    extractor: (c: HnComment) => T
+  ): Promise<T> {
+    const v = await dl.item.load(itemId);
     if (v.type !== "comment") throw new Error("Not a comment");
-    return v;
+    return extractor(v);
   }
 
   @FieldResolver()
-  async text(@Root() { id }: Comment): Promise<string | undefined> {
-    const v = await this.load(id);
-    return v.text;
+  async text(
+    @Root() root: Comment,
+    @Ctx() ctx: MyContext
+  ): Promise<Maybe<string>> {
+    return this.load(root, ctx, (v) => v.text);
+  }
+
+  @FieldResolver()
+  async parent(@Root() root: Comment, @Ctx() ctx: MyContext): Promise<Story> {
+    return this.load(root, ctx, (v) => new Story(v.parent));
+  }
+
+  @FieldResolver()
+  async kids(@Root() root: Comment, @Ctx() ctx: MyContext): Promise<Comment[]> {
+    return this.load(root, ctx, (v) => v.kids.map((k) => new Comment(k)));
   }
 }

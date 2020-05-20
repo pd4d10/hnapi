@@ -8,14 +8,16 @@ import {
   FieldResolver,
   Root,
   ID,
+  Maybe,
+  Ctx,
 } from "type-graphql";
 import { Story } from "./story";
-import { dl } from "./services";
 import { Item } from "./item";
 import { Comment } from "./comment";
 import { Job } from "./job";
 import { Poll } from "./poll";
 import { Pollopt } from "./pollopt";
+import { MyContext, HnUser } from "./services";
 
 @ObjectType()
 export class User {
@@ -54,39 +56,50 @@ export class User {
 
 @Resolver(() => User)
 export class UserResolver {
+  private async load<T>(
+    { id }: User,
+    { dl }: MyContext,
+    extractor: (c: HnUser) => T
+  ): Promise<T> {
+    const v = await dl.user.load(id);
+    return extractor(v);
+  }
+
   @Query(() => User)
   async user(@Arg("id") id: string): Promise<User> {
     return new User(id);
   }
 
   @FieldResolver()
-  async delay(@Root() { id }: User): Promise<number> {
-    const user = await dl.user.load(id);
-    return user.delay ?? 0;
+  async delay(@Root() root: User, @Ctx() ctx: MyContext): Promise<number> {
+    return this.load(root, ctx, (v) => v.delay ?? 0);
   }
 
   @FieldResolver()
-  async created(@Root() { id }: User): Promise<Date> {
-    const user = await dl.user.load(id);
-    return new Date(user.created * 1000);
+  async created(@Root() root: User, @Ctx() ctx: MyContext): Promise<Date> {
+    return this.load(root, ctx, (v) => new Date(v.created * 1000));
   }
 
   @FieldResolver()
-  async karma(@Root() { id }: User): Promise<number> {
-    const user = await dl.user.load(id);
-    return user.karma;
+  async karma(@Root() root: User, @Ctx() ctx: MyContext): Promise<number> {
+    return this.load(root, ctx, (v) => v.karma);
   }
 
   @FieldResolver()
-  async about(@Root() { id }: User): Promise<string | undefined> {
-    const user = await dl.user.load(id);
-    return user.about;
+  async about(
+    @Root() root: User,
+    @Ctx() ctx: MyContext
+  ): Promise<Maybe<string>> {
+    return this.load(root, ctx, (v) => v.about);
   }
 
   @FieldResolver()
-  async submitted(@Root() { id }: User): Promise<typeof Item[]> {
-    const user = await dl.user.load(id);
-    const items = await dl.item.loadMany(user.submitted ?? []);
+  async submitted(
+    @Root() root: User,
+    @Ctx() ctx: MyContext
+  ): Promise<typeof Item[]> {
+    const submitted = await this.load(root, ctx, (v) => v.submitted);
+    const items = await ctx.dl.item.loadMany(submitted ?? []);
     return items.map((item) => {
       if (item instanceof Error) {
         throw item;

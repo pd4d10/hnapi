@@ -6,10 +6,11 @@ import {
   Resolver,
   FieldResolver,
   Root,
+  Ctx,
+  Maybe,
 } from "type-graphql";
 import { Comment } from "./comment";
-import { dl, HnStory } from "./services";
-import { Maybe } from "./types";
+import { HnStory, MyContext } from "./services";
 
 @ObjectType()
 export class Story extends BaseItem {
@@ -33,40 +34,55 @@ export class Story extends BaseItem {
 
 @Resolver(() => Story)
 export class StoryResolver {
-  private async load(id: string): Promise<HnStory> {
-    const v = await dl.item.load(parseInt(id));
+  private async load<T>(
+    { itemId }: Story,
+    { dl }: MyContext,
+    extractor: (c: HnStory) => T
+  ): Promise<T> {
+    const v = await dl.item.load(itemId);
     if (v.type !== "story") throw new Error("Not a story");
-    return v;
+    return extractor(v);
   }
 
   @FieldResolver()
-  async text(@Root() { id }: Story): Promise<Maybe<string>> {
-    const v = await this.load(id);
-    return v.text;
+  async text(
+    @Root() root: Story,
+    @Ctx() ctx: MyContext
+  ): Promise<Maybe<string>> {
+    return this.load(root, ctx, (v) => v.text);
   }
 
   @FieldResolver()
-  async url(@Root() { id }: Story): Promise<Maybe<string>> {
-    const v = await this.load(id);
-    return v.url;
+  async url(
+    @Root() root: Story,
+    @Ctx() ctx: MyContext
+  ): Promise<Maybe<string>> {
+    return this.load(root, ctx, (v) => v.url);
   }
 
   @FieldResolver()
-  async score(@Root() { id }: Story): Promise<Maybe<number>> {
-    const v = await this.load(id);
-    return v.score;
+  async score(
+    @Root() root: Story,
+    @Ctx() ctx: MyContext
+  ): Promise<Maybe<number>> {
+    return this.load(root, ctx, (v) => v.score);
   }
 
   @FieldResolver()
-  async title(@Root() { id }: Story): Promise<Maybe<string>> {
-    const v = await this.load(id);
-    return v.title;
+  async title(
+    @Root() root: Story,
+    @Ctx() ctx: MyContext
+  ): Promise<Maybe<string>> {
+    return this.load(root, ctx, (v) => v.title);
   }
 
   @FieldResolver()
-  async comments(@Root() { id }: Story): Promise<Comment[]> {
-    const v = await this.load(id);
-    const cs = await dl.item.loadMany(v.descendants);
+  async comments(
+    @Root() root: Story,
+    @Ctx() ctx: MyContext
+  ): Promise<Comment[]> {
+    const descendants = await this.load(root, ctx, (v) => v.descendants);
+    const cs = await ctx.dl.item.loadMany(descendants);
     return cs.map((c) => {
       if (c instanceof Comment) {
         return c;
